@@ -1,10 +1,28 @@
+# ~/terraink/docker-compose.yml
+
 services:
   terraink:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    image: terraink:latest
+    build: .
+    image: terraink:local
     container_name: terraink
-    ports:
-      - "${APP_PORT:-7200}:80"
     restart: unless-stopped
+    environment:
+      - TZ=Europe/Amsterdam
+    networks:
+      - shared-infra
+    healthcheck:
+      # Using wget since the final build image is likely Alpine/Nginx based
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:80"]
+      interval: 30s
+      retries: 3
+      start_period: 10s
+      timeout: 5s
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+networks:
+  shared-infra:
+    external: true
