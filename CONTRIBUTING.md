@@ -1,8 +1,8 @@
 # Contributing to TerraInk
 
-Thanks for your interest in contributing! This file covers everything you need to get started.
+Thanks for your interest in contributing. This guide explains the required workflow and the engineering standards used in this repository.
 
----
+These requirements exist to keep the codebase coherent, extensible, and maintainable as the project grows. The goal is not extra process, but contributions that are easy to review, safe to build on, and consistent with the long-term architecture.
 
 ## Getting Started
 
@@ -14,100 +14,98 @@ cd terraink
 bun install
 ```
 
-### 2. Configure environment variables
+### 2. Optional: configure environment variables
 
 ```bash
 cp .env.example .env
 ```
 
-Then fill in the values (see [Environment Variables](#environment-variables) below).
+Environment variables are optional for local development. Check [`.env.example`](./.env.example) for the available entries.
 
-### 3. Install dependencies
+### 3. Start the development server
 
 ```bash
 bun install
-```
-
-### 4. Start the development server
-
-```bash
 bun run dev
 ```
 
 The app will be available at `http://localhost:5173`.
 
----
-
 ## Environment Variables
 
-All variables are prefixed `VITE_` and accessed only through `src/core/config.ts` — never read `import.meta.env.*` directly outside that file.
+Environment variables are documented in [`.env.example`](./.env.example).
 
-| Variable                | Required | Description                                                                               |
-| ----------------------- | -------- | ----------------------------------------------------------------------------------------- |
-| `VITE_REPO_URL`         | No       | GitHub repo page URL — shown as a link in the sidebar                                     |
-| `VITE_REPO_API_URL`     | No       | GitHub API URL (`https://api.github.com/repos/owner/repo`) — used to fetch the star count |
-| `VITE_CONTACT_EMAIL`    | No       | Contact email shown in the info panel (`mailto:` link)                                    |
-| `VITE_LEGAL_NOTICE_URL` | No       | URL to the imprint / legal notice page                                                    |
-| `VITE_PRIVACY_URL`      | No       | URL to the data privacy / privacy policy page                                             |
-
-All variables are optional — the app degrades gracefully when they are absent (links are hidden or shown at reduced opacity).
-
----
+- They are optional for most local work.
+- For testing, they must not be set unless a specific test case explicitly requires them.
+- Do not assume environment values are present for core functionality.
+- Access environment values only through `src/core/config.ts`.
 
 ## Branch Strategy
 
 The repository follows a linear promotion model:
 
-```
-dev  →  beta  →  main
+```text
+dev -> beta -> main
 ```
 
-| Branch | Purpose                                                                                                |
-| ------ | ------------------------------------------------------------------------------------------------------ |
-| `dev`  | Active development. All feature branches are created from here and PRs target here first.              |
-| `beta` | Staging / pre-release testing. Promoted from `dev` when a set of changes is ready for broader testing. |
-| `main` | Production. Only promoted from `beta` after a release is verified.                                     |
+| Branch | Purpose |
+| --- | --- |
+| `dev` | Active development. All feature branches are created from here and all external PRs target this branch first. |
+| `beta` | Staging or pre-release testing. Changes are promoted here from `dev` when they are ready for broader testing. |
+| `main` | Production. Changes reach this branch only after they were verified in `beta`. |
 
-**Always branch from `dev` and open your PR against `dev`.**
+Always branch from `dev` and always open your pull request against `dev`.
+
+Pull requests must not target `main` directly. PRs opened against `main` will be redirected or closed.
 
 ## Contribution Flow
 
 1. Pick an existing issue, or open a new issue first to discuss the bug or feature.
-2. Create a branch from `dev` with a short descriptive name (e.g. `fix/geocoding-error`, `feat/svg-export`).
-3. Implement the fix or feature in a focused, minimal diff.
-4. Run `bun install` to ensure dependencies are up to date.
+2. Create a branch from `dev` with a short descriptive name such as `fix/geocoding-error` or `feat/svg-export`.
+3. Implement the change in a focused, minimal diff.
+4. Run `bun install`.
 5. Run `bun run build` and verify the build passes before opening a PR.
-6. Open a pull request against `dev` with a clear description of the change.
-7. Add a screenshot for any visible UI changes.
+6. Open a pull request against `dev` and fill out the pull request template completely.
+7. Add screenshots for visible UI changes.
+8. Wait for maintainer review. Do not merge your own PR.
 
----
+## Pull Request Requirements
+
+Before requesting review, make sure your PR satisfies all of the following:
+
+- The PR targets `dev`, never `main`.
+- The PR description clearly explains what changed, why it changed, and any known limitations.
+- UI contributions include screenshots or a short demo of the final behavior.
+
+Maintainers may close PRs that target the wrong branch, do not follow the agreed feature scope, or do not meet the engineering standards below.
 
 ## Commit Messages
 
-Follow the emoji-style Conventional Commits format used in this repo (see [`.vscode/commit-instructions.md`](./.vscode/commit-instructions.md) for the full reference):
+Follow the emoji-style Conventional Commits format used in this repo. See [`.vscode/commit-instructions.md`](./.vscode/commit-instructions.md) for the full reference.
 
-```
+```text
 <emoji> <type>(<scope>): <subject>
 ```
 
 Common types:
 
 | Emoji | Type | When to use |
-| ----- | ---- | ----------- |
+| --- | --- | --- |
 | `✨` | `feat` | New feature |
 | `🐛` | `fix` | Bug fix |
 | `♻️` | `refactor` | Code restructure without behavior change |
-| `🖌️` | `ui` | UI-only changes (no logic) |
+| `🖌️` | `ui` | UI-only changes with no logic changes |
 | `📚` | `docs` | Documentation only |
-| `🔧` | `chore` | Maintenance, tooling, deps |
+| `🔧` | `chore` | Maintenance, tooling, or dependencies |
 | `🎨` | `style` | Formatting-only changes |
 | `⚡` | `perf` | Performance improvements |
 | `🗑️` | `del` | Remove files or code |
 
 Rules:
-- Subject must be **lowercase**, **imperative mood**, no trailing period.
-- Subject max **50 characters**; entire line max **72 characters**.
-- One logical change per commit — no multi-clause subjects.
+
+- Subject must be lowercase, imperative, and must not end with a period.
+- Subject max length is 50 characters; full line max length is 72 characters.
+- One logical change per commit.
 
 Examples:
 
@@ -118,15 +116,28 @@ Examples:
 📚 docs(readme): update setup instructions
 ```
 
----
-
 ## Code Quality
 
 - Keep code clean, readable, and reusable.
-- If something is used in more than one place, extract it into a shared component or utility.
+- The implementation must match the requested behavior and UX, not only a partial interpretation.
+- The diff should be intentionally engineered, not just reorganized to satisfy feedback superficially.
+- Build features as standalone modules or components whenever practical, then import them into the consuming screens.
+- If something is reused, extract it into a shared component, hook, constant, or utility.
 - Reuse existing components and hooks when they already cover the use case.
 - Prefer short, focused functions over long, complex ones.
 - Compose behavior through clear abstractions and interfaces.
+- Separate rendering, state or configuration, and data handling where possible.
+- Avoid hard-coded values. Use named constants, configuration objects, or shared tokens instead.
+- Prefer scalable and maintainable UI assets and controls over placeholders or one-off shortcuts.
 - Follow the naming conventions in [`agent.md`](./agent.md).
 - Add concise comments where intent is not immediately obvious.
-- Do not bypass the port/adapter architecture — read [`agent.md`](./agent.md) before adding new infrastructure code.
+- Do not bypass the port/adapter architecture. Read [`agent.md`](./agent.md) before adding new infrastructure code.
+
+## AI-Assisted Contributions
+
+AI-assisted coding is allowed. Vibe-coded submissions are not.
+
+- Review, refine, and fully understand any generated code before opening a PR.
+- Make sure generated code follows the project architecture, naming, and modularity standards.
+- Do not submit generated output that still contains hard-coded assumptions, weak abstractions, or incomplete UX requirements.
+- If a maintainer asks for a specific engineering direction, implement that direction intentionally instead of pasting agent output with minimal changes.

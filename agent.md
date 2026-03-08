@@ -63,6 +63,13 @@ Cross-cutting concerns live outside features:
 All `VITE_*` env vars are accessed **only** through `src/core/config.ts`. Never read `import.meta.env.*` anywhere else.
 See `.env.example` for the full list of supported variables.
 
+## Contribution and Documentation Rules
+
+- External pull requests must be opened against `dev`, never `main`.
+- AI-assisted coding is allowed only when the result is reviewed, refined, and aligned with the project architecture.
+- Prefer standalone modules, components, hooks, constants, and utilities over hard-coded or tightly coupled implementations.
+- In Markdown files, do not place a horizontal rule (`---`) immediately before a heading line such as `#`, `##`, or `###`.
+
 ## What NOT to Do
 
 - ❌ Do not add logic to `App.tsx` — it must stay a thin shell.
